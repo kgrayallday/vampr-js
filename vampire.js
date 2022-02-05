@@ -31,17 +31,6 @@ class Vampire {
     return count
   }
 
-  // Returns array of ancestors
-  // get bloodLine() {
-  //   const ancestors = [this];
-  //   let nextInLine = this.creator;
-  //   while (nextInLine){
-  //     ancestors.push(this.creator);
-  //     nextInLine = nextInLine.creator;
-  //   }
-  //   return ancestors;
-  // }
-
   // Returns true if this vampire is more senior than the other vampire. (Who is closer to the original vampire)
   isMoreSeniorThan(vampire) {
     return this.numberOfVampiresFromOriginal < vampire.numberOfVampiresFromOriginal;
@@ -49,20 +38,71 @@ class Vampire {
 
   /** Tree traversal methods **/
 
-  // Returns the vampire object with that name, or null if no vampire exists with that name
+  // find the root vampire
+  rootVampire() {
+    rootVamp = {}
+
+    if(this.creator) {
+      rootVampire = this.creator;
+      rootVamp.rootVampire();
+    }
+
+    return rootVamp;
+
+  }
+  
+  // Returns the vampire object with that name, or null if no vampire offspring exists with that name
   vampireWithName(name) {
-    
+    // recurse creator until root is reached
+
+    if (this.name === name) { // base case
+      return this
+    }
+
+    if (this.offspring) { // recursive call
+      for (let child of this.offspring) {
+        const vamp = child.vampireWithName(name);
+        if (vamp !== null) {
+          return vamp;
+        }
+      }
+    }
+    return null;
   }
 
   // Returns the total number of vampires that exist
   get totalDescendents() {
+    let countDescendants = 0;
+
+    if (this.offspring) {
+      countDescendants += this.offspring.length;
+    }
+
+    for (let child of this.offspring) {
+      const descendants = child.totalDescendents;
+      countDescendants += descendants;
+
+    }
+
+    return countDescendants;
     
   }
 
   // Returns an array of all the vampires that were converted after 1980
   get allMillennialVampires() {
+    let millennials = [];
+
+    if (this.yearConverted > 1980) {
+      millennials.push(this);
+    }
+
+    for (let child of this.offspring) {
+      let nextVamps = child.allMillennialVampires;
+      millennials = millennials.concat(nextVamps); // millennial concats childs results to parent results
+    }
     
-  }
+    return millennials; // return millennials from within the recursion
+  };
 
   /** Stretch **/
 
@@ -78,6 +118,8 @@ class Vampire {
 
   }
 }
+
+console.log()
 
 module.exports = Vampire;
 
